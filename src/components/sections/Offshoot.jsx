@@ -8,9 +8,9 @@ gsap.registerPlugin(ScrollTrigger)
 // Drop image files into /public/offshoot/ and fill in the paths below.
 // Leave a slot as null to keep the shimmer placeholder for that box.
 const MOSAIC_IMAGES = [
-  'images/offshoot/img1.jpeg', // e.g. '/offshoot/sample-1.jpg'
-  'images/offshoot/img2.jpeg', // e.g. '/offshoot/sample-2.jpg'
-  'images/offshoot/img3.jpeg', // e.g. '/offshoot/sample-3.jpg'
+  'images/offshoot/img5.jpeg', // e.g. '/offshoot/sample-1.jpg'
+  'images/offshoot/img6.jpeg', // e.g. '/offshoot/sample-2.jpg'
+  'images/offshoot/img7.jpeg', // e.g. '/offshoot/sample-3.jpg'
   'images/offshoot/img4.jpeg', // e.g. '/offshoot/sample-4.jpg'
 ]
 // ─────────────────────────────────────────────────────────────────────────────
@@ -21,33 +21,60 @@ const STATS = [
   { icon: '✅', label: 'E-commerce ready' },
 ]
 
+// Each image's scattered starting position — corner + rotation
+const IMG_ORIGINS = [
+  { x: -180, y: -100, rotation: -18, scale: 0.72 }, // top-left  → flies from upper-left
+  { x:  200, y:  -80, rotation:  15, scale: 0.70 }, // top-right → flies from upper-right
+  { x: -160, y:   90, rotation:  12, scale: 0.78 }, // bot-left  → flies from lower-left
+  { x:  170, y:  100, rotation: -14, scale: 0.74 }, // bot-right → flies from lower-right
+]
+
+const HEADLINE_WORDS = [
+  'Studio-quality', 'product', 'photography.', 'Without', 'the', 'studio.'
+]
+
 export default function Offshoot() {
   const sectionRef = useRef(null)
-  const leftRef    = useRef(null)
-  const rightRef   = useRef(null)
+  const imgRefs    = useRef([])
+  const wordsRef   = useRef([])
+  const tagRef     = useRef(null)
+  const bodyRef    = useRef(null)
+  const statsRef   = useRef(null)
+  const ctaRef     = useRef(null)
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
 
-      gsap.from(leftRef.current, {
-        x: -60,
+      // Headline — word-by-word curtain drop
+      gsap.from(wordsRef.current.filter(Boolean), {
+        y: '115%',
         opacity: 0,
-        duration: 1.05,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 75%',
-        },
+        duration: 1.0,
+        stagger: 0.07,
+        ease: 'power4.out',
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
       })
 
-      gsap.from(rightRef.current, {
-        x: 60,
-        opacity: 0,
-        duration: 1.05,
-        ease: 'power3.out',
+      // Tag, body, stats, CTA fade up after headline starts
+      gsap.from([tagRef.current, bodyRef.current, statsRef.current, ctaRef.current], {
+        y: 24, opacity: 0,
+        stagger: 0.1, duration: 0.8, ease: 'power2.out', delay: 0.4,
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
+      })
+
+      // Images fly in from scattered positions and land in the grid
+      gsap.from(imgRefs.current.filter(Boolean), {
+        x:        i => IMG_ORIGINS[i].x,
+        y:        i => IMG_ORIGINS[i].y,
+        rotation: i => IMG_ORIGINS[i].rotation,
+        scale:    i => IMG_ORIGINS[i].scale,
+        opacity:  0,
+        stagger:  0.18,
+        duration: 1.1,
+        ease:     'back.out(1.4)',
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: 'top 75%',
+          start: 'top 72%',
         },
       })
 
@@ -60,7 +87,7 @@ export default function Offshoot() {
     <section
       ref={sectionRef}
       className="relative py-24 px-6 overflow-hidden"
-      style={{ backgroundColor: '#1a1a1a' }}
+      style={{ backgroundColor: '#000' }}
     >
       {/* Noise / grain texture overlay */}
       <div
@@ -89,27 +116,46 @@ export default function Offshoot() {
       <div className="relative max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-16 md:gap-20">
 
         {/* ── Left — text ── */}
-        <div ref={leftRef} className="w-full md:w-1/2">
+        <div className="w-full md:w-1/2">
 
           {/* Tag */}
           <p
-            className="font-body tracking-[0.28em] m-0 mb-5"
+            ref={tagRef}
+            className="font-body tracking-[0.28em] m-0 mb-8"
             style={{ fontSize: 'clamp(11px, 1vw, 13px)', color: '#F5C518' }}
           >
             INTRODUCING OFFSHOOT BY BEING.
           </p>
 
-          {/* Headline */}
+          {/* Headline — word curtain drop */}
           <h2
-            className="font-heading text-white m-0 mb-6"
+            className="font-heading text-white m-0 mb-10"
             style={{ fontSize: 'clamp(28px, 3.5vw, 48px)', lineHeight: 1.15, fontWeight: 400 }}
           >
-            Studio-quality product photography. Without the studio.
+            {HEADLINE_WORDS.map((word, i) => (
+              <span
+                key={i}
+                style={{
+                  display: 'inline-block',
+                  overflow: 'hidden',
+                  verticalAlign: 'bottom',
+                  marginRight: i < HEADLINE_WORDS.length - 1 ? '0.28em' : 0,
+                }}
+              >
+                <span
+                  ref={el => { wordsRef.current[i] = el }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {word}
+                </span>
+              </span>
+            ))}
           </h2>
 
           {/* Body */}
           <p
-            className="font-body m-0 mb-8"
+            ref={bodyRef}
+            className="font-body m-0 mb-10"
             style={{ fontSize: 'clamp(14px, 1.2vw, 17px)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.75 }}
           >
             AI-powered visuals for jewellery, bakery, decor, and more.
@@ -117,7 +163,7 @@ export default function Offshoot() {
           </p>
 
           {/* Stats */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-10">
+          <div ref={statsRef} className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-14">
             {STATS.map((s, i) => (
               <span key={i} className="flex items-center gap-x-4">
                 <span
@@ -135,6 +181,7 @@ export default function Offshoot() {
 
           {/* CTA */}
           <a
+            ref={ctaRef}
             href="https://offshoot.beingcompany.in"
             target="_blank"
             rel="noopener noreferrer"
@@ -151,20 +198,37 @@ export default function Offshoot() {
         </div>
 
         {/* ── Right — 2×2 mosaic ── */}
-        <div ref={rightRef} className="w-full md:w-1/2">
-          <div className="grid grid-cols-2 gap-4 items-start">
+        <div className="w-full md:w-1/2 flex justify-center">
+          <div
+            className="grid grid-cols-2 gap-4 items-start w-full"
+            style={{ perspective: '900px', maxWidth: '440px' }}
+          >
             {MOSAIC_IMAGES.map((src, i) =>
               src ? (
-                <img
+                <div
                   key={i}
-                  src={src}
-                  alt={`OffShoot sample ${i + 1}`}
-                  className="rounded-lg w-full block"
-                />
+                  ref={el => { imgRefs.current[i] = el }}
+                  className="rounded-lg overflow-hidden aspect-[4/5]"
+                  style={{
+                    boxShadow: '0 12px 40px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3)',
+                    willChange: 'transform',
+                  }}
+                >
+                  <img
+                    src={src}
+                    alt={`OffShoot sample ${i + 1}`}
+                    className="w-full h-full object-cover block"
+                  />
+                </div>
               ) : (
                 <div
                   key={i}
-                  className="offshoot-shimmer rounded-lg aspect-[4/3]"
+                  ref={el => { imgRefs.current[i] = el }}
+                  className="offshoot-shimmer rounded-lg aspect-[4/5]"
+                  style={{
+                    boxShadow: '0 12px 40px rgba(0,0,0,0.55)',
+                    willChange: 'transform',
+                  }}
                 />
               )
             )}

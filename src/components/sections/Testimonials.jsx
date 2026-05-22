@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useState, useEffect } from 'react'
+import { useRef, useLayoutEffect, useEffect, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -25,55 +25,14 @@ const TESTIMONIALS = [
   },
 ]
 
-function TestimonialBlock({ testimonial }) {
-  return (
-    <div className="relative px-10 py-2">
-      {/* Decorative opening quote mark — behind text */}
-      <span
-        className="font-heading absolute top-0 left-6 select-none pointer-events-none leading-none"
-        style={{
-          fontSize: 'clamp(80px, 9vw, 120px)',
-          color: testimonial.accent,
-          opacity: 0.25,
-          lineHeight: 1,
-        }}
-        aria-hidden="true"
-      >
-        &ldquo;
-      </span>
+const CARD_W  = 380   // px — each card's width
+const OFFSET  = 440   // px — horizontal distance between card centres
 
-      {/* Quote */}
-      <p
-        className="font-body relative"
-        style={{
-          fontSize: 'clamp(17px, 1.6vw, 22px)',
-          color: '#1a1a1a',
-          lineHeight: 1.75,
-          fontStyle: 'italic',
-          margin: '0 0 32px 0',
-          paddingTop: '28px',
-        }}
-      >
-        {testimonial.quote}
-      </p>
-
-      {/* Attribution */}
-      <div>
-        <p
-          className="font-heading m-0"
-          style={{ fontSize: 'clamp(17px, 1.4vw, 20px)', color: '#0a0a0a', marginBottom: '6px' }}
-        >
-          {testimonial.name}
-        </p>
-        <p
-          className="font-display tracking-[0.22em] m-0"
-          style={{ fontSize: '12px', color: testimonial.accent }}
-        >
-          {testimonial.business}
-        </p>
-      </div>
-    </div>
-  )
+// Slot props: diff = 0 (centre), ±1 (flanking), ±2+ (hidden)
+function slotProps(diff) {
+  if (diff === 0)          return { x: 0,            y: -22, scale: 1,    opacity: 1,    zIndex: 10 }
+  if (Math.abs(diff) === 1) return { x: diff * OFFSET, y: 0,   scale: 0.82, opacity: 0.48, zIndex: 5  }
+  return                          { x: diff * OFFSET * 1.4, y: 0, scale: 0.7, opacity: 0, zIndex: 1 }
 }
 
 export default function Testimonials() {
@@ -81,44 +40,105 @@ export default function Testimonials() {
   const labelRef    = useRef(null)
   const headlineRef = useRef(null)
   const ruleRef     = useRef(null)
-  const cardsRef    = useRef([])
+  const carouselRef = useRef(null)
+  const cardRefs    = useRef([])
 
+  // Two-track active state: ref for GSAP (always current), state for React UI
+  const activeRef   = useRef(0)
+  const lockedRef   = useRef(false)
+  const touchX      = useRef(0)
+  const intervalRef = useRef(null)
+  const stepRef     = useRef(null)   // always-current step fn — avoids stale closure in setInterval
+  const isPausedRef = useRef(false)  // hover pause flag
   const [active, setActive] = useState(0)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+  const n = TESTIMONIALS.length
+
+  // Apply positions for all cards
+  const applyAll = (a, animate) => {
+    TESTIMONIALS.forEach((_, i) => {
+      const el = cardRefs.current[i]
+      if (!el) return
+      let diff = i - a
+      if (diff >  n / 2) diff -= n
+      if (diff < -n / 2) diff += n
+      const p = slotProps(diff)
+      if (animate) {
+        const isCenter = diff === 0
+        gsap.to(el, {
+          ...p,
+          duration: isCenter ? 0.85 : 0.65,
+          ease:     isCenter ? 'back.out(1.6)' : 'power3.out',
+          overwrite: 'auto',
+        })
+      } else {
+        gsap.set(el, { ...p, xPercent: -50, yPercent: -50 })
+      }
+    })
+  }
+
+  const go = (idx) => {
+    if (lockedRef.current || idx === activeRef.current) return
+    lockedRef.current = true
+    activeRef.current = idx
+    setActive(idx)
+    applyAll(idx, true)
+    setTimeout(() => { lockedRef.current = false }, 900)
+  }
+
+  const step = (dir) => go((activeRef.current + dir + n) % n)
+
+  const startTimer = () => {
+    clearInterval(intervalRef.current)
+    intervalRef.current = setInterval(() => {
+      if (!isPausedRef.current) stepRef.current?.(1)
+    }, 3200)
+  }
+  const stopTimer = () => {
+    clearInterval(intervalRef.current)
+    intervalRef.current = null
+  }
+
+  // Keep stepRef pointing at the latest step so setInterval never goes stale
+  stepRef.current = (dir) => go((activeRef.current + dir + n) % n)
+
+  // Drive timer via IntersectionObserver — starts only when section is on screen
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) startTimer()
+        else stopTimer()
+      },
+      { threshold: 0.3 }
+    )
+    if (sectionRef.current) observer.observe(sectionRef.current)
+    return () => { observer.disconnect(); stopTimer() }
+  }, [])
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActive(prev => (prev + 1) % TESTIMONIALS.length)
-    }, 4000)
-    return () => clearInterval(timer)
+    const update = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
   }, [])
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
+      applyAll(0, false)
 
       gsap.from([labelRef.current, headlineRef.current], {
-        opacity: 0,
-        y: 24,
-        stagger: 0.12,
-        duration: 0.7,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 80%',
-        },
+        opacity: 0, y: 24, stagger: 0.12, duration: 0.7, ease: 'power2.out',
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 80%' },
       })
 
-      gsap.from([ruleRef.current, ...cardsRef.current], {
-        opacity: 0,
-        y: 36,
-        stagger: 0.14,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 75%',
-        },
+      gsap.from(ruleRef.current, {
+        opacity: 0, scaleX: 0, transformOrigin: 'left', duration: 0.9, ease: 'power3.out',
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 78%' },
       })
 
+      gsap.from(carouselRef.current, {
+        opacity: 0, y: 52, duration: 1.05, ease: 'power3.out',
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 70%' },
+      })
     }, sectionRef)
 
     return () => ctx.revert()
@@ -127,7 +147,7 @@ export default function Testimonials() {
   return (
     <section
       ref={sectionRef}
-      className="py-32 px-6"
+      className="pt-20 pb-14 px-6 overflow-hidden"
       style={{ backgroundColor: '#F5F5F0' }}
     >
       <div className="max-w-6xl mx-auto">
@@ -135,8 +155,8 @@ export default function Testimonials() {
         {/* Label */}
         <p
           ref={labelRef}
-          className="font-display text-center tracking-[0.3em] m-0 mb-5"
-          style={{ fontSize: 'clamp(13px, 1.1vw, 16px)', color: '#0a0a0a', opacity: 0.45 }}
+          className="font-body text-center tracking-[0.22em] m-0 mb-5"
+          style={{ fontSize: 'clamp(13px, 1.1vw, 15px)', color: '#0a0a0a', opacity: 0.45, textTransform: 'uppercase' }}
         >
           WHAT PEOPLE SAY
         </p>
@@ -145,65 +165,153 @@ export default function Testimonials() {
         <h2
           ref={headlineRef}
           className="font-heading text-center m-0 mb-14"
-          style={{ fontSize: 'clamp(28px, 3.5vw, 46px)', color: '#0a0a0a', fontWeight: 400 }}
+          style={{ fontSize: 'clamp(28px, 3.5vw, 46px)', color: '#0a0a0a', fontWeight: 400, marginBottom: '1rem' }}
         >
           Don&rsquo;t take our word for it.
         </h2>
 
-        {/* Horizontal rule */}
+        {/* ── Carousel ── */}
         <div
-          ref={ruleRef}
-          className="w-full mb-0"
-          style={{ height: '1px', backgroundColor: '#ddd' }}
-        />
-
-        {/* ── Desktop: 3 columns with vertical dividers ── */}
-        <div className="hidden md:flex pt-14">
-          {TESTIMONIALS.map((t, i) => (
-            <div
-              key={i}
-              ref={el => { cardsRef.current[i] = el }}
-              className="flex-1 relative"
-              style={i < TESTIMONIALS.length - 1 ? { borderRight: '1px solid #ddd' } : {}}
-            >
-              <TestimonialBlock testimonial={t} />
-            </div>
-          ))}
-        </div>
-
-        {/* ── Mobile: auto-rotating carousel ── */}
-        <div className="md:hidden pt-10">
-          <div className="overflow-hidden">
-            <div
-              className="flex transition-transform duration-500 ease-in-out"
-              style={{ transform: `translateX(-${active * 100}%)` }}
-            >
-              {TESTIMONIALS.map((t, i) => (
-                <div key={i} className="w-full flex-shrink-0">
-                  <TestimonialBlock testimonial={t} />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Dot indicators */}
-          <div className="flex justify-center gap-3 mt-8">
-            {TESTIMONIALS.map((_, i) => (
-              <button
+          ref={carouselRef}
+          className="pt-14"
+          onMouseEnter={() => { isPausedRef.current = true }}
+          onMouseLeave={() => { isPausedRef.current = false }}
+          onTouchStart={e => { touchX.current = e.touches[0].clientX }}
+          onTouchEnd={e => {
+            const delta = touchX.current - e.changedTouches[0].clientX
+            if (Math.abs(delta) > 48) { step(delta > 0 ? 1 : -1); startTimer() }
+          }}
+        >
+          {/* Track */}
+          <div className="relative" style={{ height: '460px' }}>
+            {TESTIMONIALS.map((t, i) => (
+              <div
                 key={i}
-                onClick={() => setActive(i)}
-                aria-label={`Go to testimonial ${i + 1}`}
-                className="rounded-full transition-all duration-300"
+                ref={el => { cardRefs.current[i] = el }}
+                className="absolute"
                 style={{
-                  width: i === active ? '20px' : '8px',
-                  height: '8px',
-                  backgroundColor: i === active ? '#0a0a0a' : 'rgba(0,0,0,0.22)',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: 0,
+                  top: '50%',
+                  left: '50%',
+                  width: `min(${CARD_W}px, calc(100vw - 40px))`,
+                  backgroundColor: '#fff',
+                  padding: '36px 28px 32px',
+                  minHeight: '320px',
+                  cursor: i !== active ? 'pointer' : 'default',
+                  boxShadow: i === active
+                    ? '0 28px 72px rgba(0,0,0,0.14), 0 6px 24px rgba(0,0,0,0.08)'
+                    : '0 2px 14px rgba(0,0,0,0.06)',
+                  borderBottom: `3px solid ${i === active ? t.accent : 'transparent'}`,
+                  transition: 'box-shadow 0.65s ease, border-color 0.55s ease',
+                  willChange: 'transform, opacity',
                 }}
-              />
+                onClick={() => { if (i !== active) go(i) }}
+                onMouseEnter={() => {
+                  if (i !== activeRef.current)
+                    gsap.to(cardRefs.current[i], { scale: 0.87, opacity: 0.7, duration: 0.25, overwrite: 'auto' })
+                }}
+                onMouseLeave={() => {
+                  if (i !== activeRef.current) {
+                    let diff = i - activeRef.current
+                    if (diff >  n / 2) diff -= n
+                    if (diff < -n / 2) diff += n
+                    const p = slotProps(diff)
+                    gsap.to(cardRefs.current[i], { scale: p.scale, opacity: p.opacity, duration: 0.25, overwrite: 'auto' })
+                  }
+                }}
+              >
+                {/* Decorative quote mark */}
+                <span
+                  className="font-heading absolute select-none pointer-events-none"
+                  style={{
+                    top: '10px', left: '32px',
+                    fontSize: '120px',
+                    color: t.accent,
+                    opacity: 0.13,
+                    lineHeight: 1,
+                  }}
+                  aria-hidden="true"
+                >
+                  &ldquo;
+                </span>
+
+                {/* Quote */}
+                <p
+                  className="font-body relative m-0"
+                  style={{
+                    fontSize: 'clamp(18px, 1.6vw, 22px)',
+                    color: '#1a1a1a',
+                    lineHeight: 1.75,
+                    fontStyle: 'italic',
+                    paddingTop: '20px',
+                    marginBottom: '32px',
+                  }}
+                >
+                  {t.quote}
+                </p>
+
+                {/* Attribution */}
+                <div>
+                  <p
+                    className="font-heading m-0"
+                    style={{ fontSize: 'clamp(17px, 1.3vw, 20px)', color: '#0a0a0a', marginBottom: '6px' }}
+                  >
+                    {t.name}
+                  </p>
+                  <p
+                    className="font-body tracking-[0.18em] m-0"
+                    style={{ fontSize: '12px', color: t.accent, textTransform: 'uppercase' }}
+                  >
+                    {t.business}
+                  </p>
+                </div>
+              </div>
             ))}
+
+            {/* Left arrow — hugs left edge of the centre card */}
+            <button
+              onClick={() => step(-1)}
+              aria-label="Previous testimonial"
+              className="absolute flex items-center justify-center"
+              style={{
+                left: isMobile
+                  ? 'calc(50% - min(380px, 100vw - 40px) / 2 + 22px)'
+                  : `calc(50% - ${CARD_W / 2}px - 28px)`,
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 20,
+                background: 'none', border: 'none', cursor: 'pointer',
+                padding: '8px 4px', opacity: 0.6, transition: 'opacity 0.2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '1' }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '0.6' }}
+            >
+              <svg width="10" height="34" viewBox="0 0 16 52" fill="none">
+                <path d="M13 3 L2 26 L13 49" stroke="#0a0a0a" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+            {/* Right arrow — hugs right edge of the centre card */}
+            <button
+              onClick={() => step(1)}
+              aria-label="Next testimonial"
+              className="absolute flex items-center justify-center"
+              style={{
+                left: isMobile
+                  ? 'calc(50% + min(380px, 100vw - 40px) / 2 - 22px)'
+                  : `calc(50% + ${CARD_W / 2}px + 28px)`,
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 20,
+                background: 'none', border: 'none', cursor: 'pointer',
+                padding: '8px 4px', opacity: 0.6, transition: 'opacity 0.2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '1' }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '0.6' }}
+            >
+              <svg width="10" height="34" viewBox="0 0 16 52" fill="none">
+                <path d="M3 3 L14 26 L3 49" stroke="#0a0a0a" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
           </div>
         </div>
 

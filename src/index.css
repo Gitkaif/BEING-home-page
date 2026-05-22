@@ -8,6 +8,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -15,8 +16,23 @@ body {
   background-color: #000;
   color: #fff;
   overflow-x: hidden;
+  cursor: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+a, button {
+  cursor: none;
+}
+
+@media (hover: none), (pointer: coarse), (max-width: 768px) {
+  body {
+    cursor: auto;
+  }
+
+  a, button {
+    cursor: pointer;
+  }
 }
 
 #root {
@@ -26,4 +42,21 @@ body {
   max-width: none;
   border: none;
   text-align: left;
+}
+
+@media (max-width: 768px) {
+  .services-grid {
+    grid-auto-rows: 1fr;
+    align-items: stretch;
+  }
+
+  .service-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .service-card-inner {
+    flex: 1;
+  }
 }

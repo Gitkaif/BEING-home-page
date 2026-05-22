@@ -1,5 +1,6 @@
 import { useRef, useLayoutEffect } from 'react'
 import gsap from 'gsap'
+import LightRays from '../LightRays'
 
 // Two intentional lines — mirrors the work page's deliberate line-break approach
 const HEADLINE_LINES = [
@@ -9,14 +10,30 @@ const HEADLINE_LINES = [
 const TICKER_TEXT = 'CONTENT CREATION ·  SOCIAL MEDIA ·  BRANDING ·  WEBSITES ·  OFFSHOOT ·  '
 
 export default function Hero() {
-  const wordsRef = useRef([])
+  const sectionRef = useRef(null)
+  const contentRef = useRef(null)
+  const wordsRef   = useRef([])
   const sublineRef = useRef(null)
-  const ctasRef = useRef(null)
-  const tickerRef = useRef(null)
-  const singleRef = useRef(null)
+  const ctasRef    = useRef(null)
+  const tickerRef  = useRef(null)
+  const singleRef  = useRef(null)
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
+
+      // ── Hero content parallax exit — drifts up + fades as you scroll away ──
+      gsap.to(contentRef.current, {
+        y: -70,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: '50% top',
+          end: 'bottom top',
+          scrub: 1.2,
+        },
+      })
+
       gsap.from(wordsRef.current, {
         opacity: 0,
         y: 28,
@@ -48,10 +65,28 @@ export default function Hero() {
   }, [])
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-black text-white overflow-hidden">
+    <section ref={sectionRef} className="relative min-h-screen flex items-center justify-center bg-black text-white overflow-hidden">
+
+      {/* Light rays — full-bleed WebGL background */}
+      <div className="absolute inset-0 z-0" style={{ opacity: 1 }}>
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#ffffff"
+          raysSpeed={1}
+          lightSpread={0.5}
+          rayLength={8}
+          followMouse={true}
+          mouseInfluence={0.1}
+          noiseAmount={0}
+          distortion={0}
+          pulsating={false}
+          fadeDistance={1}
+          saturation={1}
+        />
+      </div>
 
       {/* Content — dead center of the viewport */}
-      <div className="flex flex-col items-center text-center px-6">
+      <div ref={contentRef} className="relative z-10 flex flex-col items-center text-center px-6">
 
         {/* Headline */}
         <h1
@@ -111,7 +146,7 @@ export default function Hero() {
       </div>
 
       {/* Ticker — pinned to bottom */}
-      <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 py-4 overflow-hidden">
+      <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-white/10 py-4 overflow-hidden">
         <div
           ref={tickerRef}
           className="flex whitespace-nowrap will-change-transform"

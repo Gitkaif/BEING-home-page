@@ -5,10 +5,11 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 gsap.registerPlugin(ScrollTrigger)
 
 const STATS = [
-  { value: 20,  suffix: '+',   label: 'Brands worked with' },
-  { value: 4,   suffix: '',    label: 'Core services' },
-  { value: 48,  suffix: 'hrs', label: 'OffShoot delivery' },
-  { value: 100, suffix: '%',   label: 'Curiosity, every time' },
+  { value: 92,   suffix: '%',  label: 'Client Retention Rate',        decimals: 0 },
+  { value: 30,   suffix: '+',  label: 'Brands Worked With',           decimals: 0 },
+  { value: 2.5,  suffix: 'M+', label: 'Impressions Generated',        decimals: 1 },
+  { value: 12,   suffix: '+',  label: 'Industries',                   decimals: 0 },
+  { value: 5000, suffix: '+',  label: 'Pieces of Content Produced',   decimals: 0 },
 ]
 
 export default function Numbers() {
@@ -18,6 +19,21 @@ export default function Numbers() {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
+
+      // ── Bright panel rises over the dark hero (clip-path scrub) ──
+      gsap.fromTo(sectionRef.current,
+        { clipPath: 'inset(8% 0 0 0)' },
+        {
+          clipPath: 'inset(0% 0 0 0)',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top bottom',
+            end: 'top 15%',
+            scrub: 1.6,
+          },
+        }
+      )
 
       // Fade-up entrance — staggered per item
       gsap.from(itemsRef.current, {
@@ -45,7 +61,8 @@ export default function Numbers() {
             start: 'top 75%',
           },
           onUpdate() {
-            el.textContent = Math.round(obj.val) + stat.suffix
+            const display = stat.decimals > 0 ? obj.val.toFixed(stat.decimals) : Math.round(obj.val)
+            el.textContent = display + stat.suffix
           },
         })
       })
@@ -58,22 +75,22 @@ export default function Numbers() {
   return (
     <section
       ref={sectionRef}
-      className="py-24 px-6"
+      className="py-12 md:py-24 px-6"
       style={{ backgroundColor: '#F5F5F0' }}
     >
-      <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-y-16 gap-x-8">
+      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-y-10 md:gap-y-16 gap-x-8">
         {STATS.map((stat, i) => (
           <div
             key={i}
             ref={el => { itemsRef.current[i] = el }}
-            className="flex flex-col items-center text-center"
+            className={`flex flex-col items-center text-center${i === STATS.length - 1 ? ' col-span-2 md:col-span-1' : ''}`}
           >
             <span
               ref={el => { numsRef.current[i] = el }}
               className="font-heading"
-              style={{ fontSize: 'clamp(52px, 5.5vw, 80px)', lineHeight: 1, color: '#0a0a0a' }}
+              style={{ fontSize: 'clamp(36px, 5.5vw, 80px)', lineHeight: 1, color: '#0a0a0a' }}
             >
-              0{stat.suffix}
+              {stat.decimals > 0 ? (0).toFixed(stat.decimals) : 0}{stat.suffix}
             </span>
             <span
               className="font-body mt-3"

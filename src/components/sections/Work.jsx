@@ -8,10 +8,10 @@ gsap.registerPlugin(ScrollTrigger)
 // Drop image files into /public/work/ and set the filename below.
 // Leave `image` as null to keep the dark placeholder.
 const PROJECTS = [
-  { name: 'Juni',         tag: 'BRANDING', accent: '#9B59B6', image: '/images/services/social-media/img44.png' }, // e.g. '/work/aromas.jpg'
-  { name: 'Verse Collective',      tag: 'SMM',      accent: '#4CAF50', image: '/images/services/web-dev/img3.png' }, // e.g. '/work/verse.jpg'
-  { name: 'Lumino Studio',         tag: 'WEB',      accent: '#FF6B6B', image: '/images/services/web-dev/img11.png' }, // e.g. '/work/lumino.jpg'
-  { name: 'The Offshoot Campaign', tag: 'CONTENT',  accent: '#F5C518', image: 'images/imgg.png' }, // e.g. '/work/offshoot.jpg'
+  { name: 'Content Creaiton',         tag: 'Content ', accent: '#9B59B6', image: '/images/services/content/shoots/collage-h.png' }, // e.g. '/work/aromas.jpg'
+  { name: 'Website Creation',      tag: 'WEB',      accent: '#4CAF50', image: '/images/services/web-dev/img3.png' }, // e.g. '/work/verse.jpg'
+  { name: 'Website Creation',         tag: 'WEB',      accent: '#FF6B6B', image: '/images/services/web-dev/img11.png' }, // e.g. '/work/lumino.jpg'
+  { name: 'BRANDING', tag: 'BRANDING',  accent: '#F5C518', image: 'images/imgg.png' }, // e.g. '/work/offshoot.jpg'
 ]
 // ─────────────────────────────────────────────────────────────────────────────
 

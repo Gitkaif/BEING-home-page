@@ -65,15 +65,16 @@ export default function AboutTeaser() {
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-0">
 
         {/* ── Left: image ── */}
-        <div ref={leftRef} className="w-full md:w-1/2 md:pr-14 flex justify-center md:justify-start">
+        <div ref={leftRef} className="w-full md:w-[58%] md:pr-10 flex justify-center md:justify-start">
           <img
             ref={imgRef}
-            src="/images/services/content/shoots/collage-v.png"
+            src="/images/services/content/shoots/img.jpeg"
             alt="About Being"
-            className="relative w-full object-cover"
+            className="relative block"
             style={{
-              maxWidth: '450px',
-              aspectRatio: '4 / 5',
+              width: '100%',
+              maxWidth: '620px',
+              height: 'auto',
               filter: 'grayscale(100%) contrast(1.15)',
               borderLeft: '3px solid #F5C518',
             }}
@@ -81,7 +82,7 @@ export default function AboutTeaser() {
         </div>
 
         {/* ── Right: text content ── */}
-        <div className="w-full md:w-1/2 flex flex-col gap-6 md:pl-4">
+        <div className="w-full md:w-[42%] flex flex-col gap-6 md:pl-4">
 
           {/* Tag */}
           <p

@@ -1,520 +1,391 @@
-import { useRef, useLayoutEffect } from 'react'
+import { useRef, useLayoutEffect, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
+const SERVICE_PAGE = 'https://being-service-page.vercel.app/'
+
 const SERVICES = [
   {
-    num: '01',
     name: 'Content Creation',
-    desc: 'Posts, reels, carousels, and copy that actually convert.',
-    accent: '#F5C518',
-    tags: 'VISUAL · COPY · REELS',
+    desc: 'Offers videos, graphics, blogs, and content calendar planning for social media posts.',
+    image: 'https://static.wixstatic.com/media/11062b_e5dc31a5a1564245a98312329c3ace5d~mv2.jpg/v1/fill/w_640,h_800,al_c,q_85,enc_avif,quality_auto/Green%20Abstract%20Object.jpg',
+    overlayColor: 'rgba(125, 162, 122, 0.95)',
   },
   {
-    num: '02',
     name: 'Social Media Management',
-    desc: 'Strategy, scheduling, community — fully handled.',
-    accent: '#4CAF50',
-    tags: 'STRATEGY · GROWTH · ENGAGE',
+    desc: 'Grow your brand with smart strategies, targeted ads, and performance insights.',
+    image: 'https://static.wixstatic.com/media/11062b_bdde99af571e49eab366f7ac781d72eb~mv2.jpg/v1/fill/w_640,h_800,al_c,q_85,enc_avif,quality_auto/Squashed%20Balloon.jpg',
+    overlayColor: 'rgba(172, 155, 205, 0.95)',
   },
   {
-    num: '03',
     name: 'Website Development',
-    desc: 'Fast, beautiful, responsive websites built to grow.',
-    accent: '#FF6B6B',
-    tags: 'DESIGN · CODE · LAUNCH',
+    desc: 'Designing user-friendly websites that are SEO-optimized and secure.',
+    image: 'https://static.wixstatic.com/media/11062b_391ee7a88df84b8ba33ad134b2c2efcb~mv2.jpg/v1/fill/w_640,h_800,al_c,q_85,enc_avif,quality_auto/Pink%20Blocks.jpg',
+    overlayColor: 'rgba(205, 162, 142, 0.95)',
   },
   {
-    num: '04',
     name: 'Branding',
-    desc: 'Identity, voice, and visuals that make you unmistakable.',
-    accent: '#9B59B6',
-    tags: 'IDENTITY · VOICE · MARKS',
+    desc: "Creating unique logos, setting brand guidelines, and crafting your brand's story.",
+    image: 'https://static.wixstatic.com/media/11062b_267f829391e24dddb3978f01f503ffd0~mv2.jpg/v1/fill/w_640,h_800,al_c,q_85,enc_avif,quality_auto/Abstract%20Shapes.jpg',
+    overlayColor: 'rgba(38, 120, 175, 0.97)',
   },
 ]
 
-// ── Illustration: Content Creation ──────────────────────────────────
-function IllustContent({ accent }) {
+const HEADING_WORDS = ['Our', 'Services']
+
+function PhoneIcon() {
   return (
-    <svg viewBox="0 0 220 160" fill="none" className="w-full h-full" style={{ overflow: 'visible' }}>
-      {/* Stacked content cards */}
-      <rect className="c-back" x="18" y="40" width="120" height="88" rx="4"
-        stroke={accent} strokeWidth="1" opacity="0.2" />
-      <rect className="c-mid" x="36" y="24" width="120" height="88" rx="4"
-        stroke={accent} strokeWidth="1.2" opacity="0.45" />
-      <rect className="c-front" x="54" y="8" width="120" height="88" rx="4"
-        fill="#111" stroke={accent} strokeWidth="1.5" />
-      {/* Play triangle */}
-      <polygon className="c-play" points="95,28 95,76 136,52" fill={accent} />
-      {/* Caption lines on front card */}
-      <line x1="66" y1="84" x2="164" y2="84" stroke={accent} strokeWidth="1" opacity="0.3" />
-      <line x1="66" y1="92" x2="148" y2="92" stroke={accent} strokeWidth="1" opacity="0.18" />
-      {/* Floating dashed ring accent — top right */}
-      <circle className="c-ring" cx="180" cy="30" r="17"
-        stroke={accent} strokeWidth="1" strokeDasharray="5 3" opacity="0.28" />
-      <line x1="176" y1="30" x2="184" y2="30" stroke={accent} strokeWidth="1.5" opacity="0.55" />
-      <line x1="180" y1="26" x2="180" y2="34" stroke={accent} strokeWidth="1.5" opacity="0.55" />
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
+      <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.32.57 3.58.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.18 21 3 13.82 3 5c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.27.2 2.47.57 3.58.11.35.03.74-.24 1.02L6.6 10.8z" />
     </svg>
   )
 }
 
-// ── Illustration: Social Media ───────────────────────────────────────
-function IllustSocial({ accent }) {
+function ServiceCard({ s, index, isOpen, onToggle }) {
   return (
-    <svg viewBox="0 0 220 160" fill="none" className="w-full h-full" style={{ overflow: 'visible' }}>
-      {/* Rising bars */}
-      <rect className="s-b1" x="22"  y="112" width="24" height="34"  rx="1" fill={accent} opacity="0.18" />
-      <rect className="s-b2" x="56"  y="90"  width="24" height="56"  rx="1" fill={accent} opacity="0.28" />
-      <rect className="s-b3" x="90"  y="66"  width="24" height="80"  rx="1" fill={accent} opacity="0.42" />
-      <rect className="s-b4" x="124" y="42"  width="24" height="104" rx="1" fill={accent} opacity="0.58" />
-      <rect className="s-b5" x="158" y="18"  width="24" height="128" rx="1" fill={accent} opacity="0.78" />
-      {/* Trend line */}
-      <polyline className="s-line"
-        points="34,114 68,92 102,68 136,44 170,20"
-        stroke={accent} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Data point dots */}
-      <circle className="s-d1" cx="34"  cy="114" r="4.5" fill="#000" stroke={accent} strokeWidth="2" />
-      <circle className="s-d2" cx="68"  cy="92"  r="4.5" fill="#000" stroke={accent} strokeWidth="2" />
-      <circle className="s-d3" cx="102" cy="68"  r="4.5" fill={accent} />
-      <circle className="s-d4" cx="136" cy="44"  r="4.5" fill={accent} />
-      <circle className="s-d5" cx="170" cy="20"  r="4.5" fill={accent} />
-    </svg>
+    <a
+      href={SERVICE_PAGE}
+      style={{
+        display: 'block',
+        position: 'relative',
+        borderRadius: '18px',
+        overflow: 'hidden',
+        aspectRatio: '3 / 4',
+        textDecoration: 'none',
+        transition: 'transform 0.35s ease, box-shadow 0.35s ease',
+      }}
+      onMouseEnter={e => {
+        if (!isOpen) {
+          e.currentTarget.style.transform = 'translateY(-6px) scale(1.015)'
+          e.currentTarget.style.boxShadow = '0 24px 48px rgba(0,0,0,0.4)'
+        }
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = 'none'
+        e.currentTarget.style.boxShadow = 'none'
+      }}
+    >
+      {/* Cover image */}
+      <img
+        src={s.image}
+        alt={s.name}
+        loading="lazy"
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+
+      {/* Bottom gradient always visible */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%)',
+          pointerEvents: 'none',
+          transition: 'opacity 0.35s ease',
+          opacity: isOpen ? 0 : 1,
+        }}
+      />
+
+      {/* Bottom bar — name + toggle btn */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: '18px 20px',
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          gap: '12px',
+          zIndex: 2,
+          transition: 'opacity 0.2s ease',
+          opacity: isOpen ? 0 : 1,
+          pointerEvents: isOpen ? 'none' : 'auto',
+        }}
+      >
+        <a
+          href={SERVICE_PAGE}
+          onClick={e => e.stopPropagation()}
+          style={{
+            fontSize: 'clamp(15px, 1.3vw, 18px)',
+            color: '#fff',
+            fontWeight: 600,
+            fontStyle: 'normal',
+            textDecoration: 'underline',
+            textUnderlineOffset: '4px',
+            lineHeight: 1.25,
+            textDecorationColor: 'rgba(255,255,255,0.6)',
+            fontFamily: 'inherit',
+            letterSpacing: '0.01em',
+          }}
+        >
+          {s.name}
+        </a>
+        <button
+          onClick={e => { e.preventDefault(); e.stopPropagation(); onToggle() }}
+          style={{
+            width: '36px',
+            height: '36px',
+            border: '1.5px solid rgba(255,255,255,0.65)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            fontSize: '22px',
+            lineHeight: 1,
+            flexShrink: 0,
+            background: 'transparent',
+            cursor: 'pointer',
+            padding: 0,
+          }}
+        >
+          +
+        </button>
+      </div>
+
+      {/* Description overlay — slides up from bottom */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '72%',
+          backgroundColor: s.overlayColor,
+          borderRadius: '18px 18px 18px 18px',
+          transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
+          transition: 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1)',
+          zIndex: 3,
+          padding: '24px 20px 20px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '14px',
+        }}
+      >
+        {/* Overlay header: name + close */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+          <a
+            href={SERVICE_PAGE}
+            onClick={e => e.stopPropagation()}
+            style={{
+              fontSize: 'clamp(15px, 1.3vw, 18px)',
+              color: '#fff',
+              fontWeight: 600,
+              fontStyle: 'normal',
+              textDecoration: 'underline',
+              textUnderlineOffset: '4px',
+              textDecorationColor: 'rgba(255,255,255,0.6)',
+              lineHeight: 1.25,
+              fontFamily: 'inherit',
+              letterSpacing: '0.01em',
+            }}
+          >
+            {s.name}
+          </a>
+          <button
+            onClick={e => { e.preventDefault(); e.stopPropagation(); onToggle() }}
+            style={{
+              width: '36px',
+              height: '36px',
+              border: '1.5px solid rgba(255,255,255,0.65)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontSize: '20px',
+              lineHeight: 1,
+              flexShrink: 0,
+              background: 'transparent',
+              cursor: 'pointer',
+              padding: 0,
+              transform: 'rotate(45deg)',
+            }}
+          >
+            +
+          </button>
+        </div>
+
+        {/* Description */}
+        <p
+          className="font-body"
+          style={{
+            fontSize: 'clamp(13px, 1.05vw, 15px)',
+            color: 'rgba(255,255,255,0.9)',
+            lineHeight: 1.7,
+            margin: 0,
+            textAlign: 'center',
+          }}
+        >
+          {s.desc}
+        </p>
+      </div>
+    </a>
   )
 }
 
-// ── Illustration: Website Development ───────────────────────────────
-function IllustWeb({ accent }) {
-  return (
-    <svg viewBox="0 0 220 160" fill="none" className="w-full h-full" style={{ overflow: 'visible' }}>
-      {/* Browser chrome */}
-      <rect x="12" y="6" width="196" height="146" rx="5"
-        stroke={accent} strokeWidth="1.5" opacity="0.65" />
-      <line x1="12" y1="30" x2="208" y2="30" stroke={accent} strokeWidth="1" opacity="0.3" />
-      <circle cx="24" cy="18" r="3.5" fill={accent} opacity="0.6" />
-      <circle cx="35" cy="18" r="3.5" fill={accent} opacity="0.35" />
-      <circle cx="46" cy="18" r="3.5" stroke={accent} strokeWidth="0.8" opacity="0.25" />
-      <rect x="58" y="13" width="104" height="10" rx="3"
-        stroke={accent} strokeWidth="0.8" opacity="0.22" />
-      {/* Layout blocks */}
-      <rect className="w-hero" x="20" y="38" width="180" height="44" rx="2"
-        fill={accent} opacity="0.05" stroke={accent} strokeWidth="0.8" strokeOpacity="0.28" />
-      <rect className="w-a" x="20"  y="90" width="84"  height="50" rx="2"
-        fill={accent} opacity="0.04" stroke={accent} strokeWidth="0.8" strokeOpacity="0.22" />
-      <rect className="w-b" x="112" y="90" width="88" height="23" rx="2"
-        fill={accent} opacity="0.04" stroke={accent} strokeWidth="0.8" strokeOpacity="0.22" />
-      <rect className="w-c" x="112" y="117" width="88" height="23" rx="2"
-        fill={accent} opacity="0.04" stroke={accent} strokeWidth="0.8" strokeOpacity="0.22" />
-      {/* Cursor arrow */}
-      <path className="w-cursor"
-        d="M60,48 L60,74 L66,69.5 L68.5,77.5 L71,76.5 L68.5,68.5 L75,68.5 Z"
-        fill={accent} opacity="0.82" />
-    </svg>
-  )
-}
-
-// ── Illustration: Branding ───────────────────────────────────────────
-function IllustBrand({ accent }) {
-  return (
-    <svg viewBox="0 0 220 172" fill="none" className="w-full h-full" style={{ overflow: 'visible' }}>
-      {/* Outer dashed ring (rotates on hover) */}
-      <circle className="b-outer" cx="110" cy="68" r="64"
-        stroke={accent} strokeWidth="0.8" strokeDasharray="8 5" opacity="0.18" />
-      {/* Inner solid ring */}
-      <circle className="b-mid" cx="110" cy="68" r="47"
-        stroke={accent} strokeWidth="1" opacity="0.28" />
-      {/* B letterform — vertical stem */}
-      <line x1="82" y1="26" x2="82" y2="106"
-        stroke={accent} strokeWidth="3.5" strokeLinecap="round" />
-      {/* Top bowl (path draw on scroll) */}
-      <path className="b-top"
-        d="M82 26 L108 26 Q138 26 138 46 Q138 66 108 66 L82 66"
-        stroke={accent} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      {/* Bottom bowl */}
-      <path className="b-bot"
-        d="M82 66 L112 66 Q142 66 142 84 Q142 102 112 102 L82 102"
-        stroke={accent} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      {/* Palette swatches */}
-      <circle className="sw-1" cx="80"  cy="142" r="8" fill={accent} opacity="0.9" />
-      <circle className="sw-2" cx="100" cy="142" r="8" fill={accent} opacity="0.55" />
-      <circle className="sw-3" cx="120" cy="142" r="8" fill={accent} opacity="0.25" />
-      <circle className="sw-4" cx="140" cy="142" r="8"
-        stroke={accent} strokeWidth="1.2" opacity="0.3" />
-    </svg>
-  )
-}
-
-// ── Main Component ───────────────────────────────────────────────────
 export default function Services() {
   const sectionRef = useRef(null)
-  const labelRef   = useRef(null)
+  const wordsRef   = useRef([])
+  const ruleRef    = useRef(null)
+  const descRef    = useRef(null)
+  const ctasRef    = useRef(null)
   const cardsRef   = useRef([])
-  const innerRefs  = useRef([])
-  const glowRefs   = useRef([])
-  const ctaRef       = useRef(null)
-  const ctaLinkRef   = useRef(null)
-  const ctaWordsRef  = useRef([])
-  const labelWordsRef = useRef([])
+
+  const [openCard, setOpenCard] = useState(null)
+
+  const toggle = (i) => setOpenCard(prev => (prev === i ? null : i))
 
   useLayoutEffect(() => {
-    const listeners = []
-
     const ctx = gsap.context(() => {
 
-      // ── Section entrance ─────────────────────────────────────────
-      // "Our Services" — slot-machine drop-in, fires once on scroll
-      gsap.from(labelWordsRef.current.filter(Boolean), {
-        y: 22, opacity: 0,
-        stagger: 0.14,
-        duration: 0.55,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 80%',
-          once: true,
-        },
-      })
-
-      // CTA words stagger in
-      gsap.from(ctaWordsRef.current.filter(Boolean), {
-        opacity: 0, y: 18,
-        stagger: 0.08, duration: 0.5, ease: 'power2.out',
-        scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true },
-      })
-
-      gsap.from(cardsRef.current, {
-        opacity: 0, y: 64,
-        immediateRender: false,
-        stagger: 0.13, duration: 0.95, ease: 'power3.out',
-        clearProps: 'all',
+      gsap.from(wordsRef.current.filter(Boolean), {
+        y: '115%',
+        opacity: 0,
+        duration: 1.0,
+        stagger: 0.07,
+        ease: 'power4.out',
         scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
       })
 
-      // ── Card 0: content cards fan in ─────────────────────────────
-      const c0 = cardsRef.current[0]
-      if (c0) {
-        const q = gsap.utils.selector(c0)
-        gsap.fromTo([q('.c-back'), q('.c-mid')],
-          { opacity: 0, x: 16 },
-          { opacity: 1, x: 0, stagger: 0.1, duration: 0.7, ease: 'power2.out', clearProps: 'opacity,x',
-            scrollTrigger: { trigger: c0, start: 'top 82%', once: true } }
-        )
-        gsap.fromTo(q('.c-ring'),
-          { rotation: -120, opacity: 0 },
-          { rotation: 0, opacity: 1, duration: 1.1, ease: 'power2.out', transformOrigin: '50% 50%', clearProps: 'opacity',
-            scrollTrigger: { trigger: c0, start: 'top 80%', once: true } }
-        )
-      }
-
-      // ── Card 1: bars grow + line draws ───────────────────────────
-      const c1 = cardsRef.current[1]
-      if (c1) {
-        const q = gsap.utils.selector(c1)
-        gsap.fromTo([q('.s-b1'), q('.s-b2'), q('.s-b3'), q('.s-b4'), q('.s-b5')],
-          { scaleY: 0 },
-          { scaleY: 1, transformOrigin: '50% 100%', stagger: 0.08, duration: 0.65, ease: 'power2.out', clearProps: 'scaleY',
-            scrollTrigger: { trigger: c1, start: 'top 82%', once: true } }
-        )
-        const lineEl = q('.s-line')[0]
-        if (lineEl && lineEl.getTotalLength) {
-          const len = lineEl.getTotalLength()
-          gsap.set(lineEl, { strokeDasharray: len, strokeDashoffset: len })
-          gsap.to(lineEl, {
-            strokeDashoffset: 0, duration: 1.1, ease: 'power2.out', delay: 0.25,
-            scrollTrigger: { trigger: c1, start: 'top 80%', once: true },
-          })
+      gsap.fromTo(ruleRef.current,
+        { scaleX: 0 },
+        {
+          scaleX: 1,
+          duration: 1.2,
+          ease: 'expo.inOut',
+          transformOrigin: 'left center',
+          delay: 0.3,
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
         }
-        gsap.fromTo([q('.s-d1'), q('.s-d2'), q('.s-d3'), q('.s-d4'), q('.s-d5')],
-          { scale: 0, opacity: 0 },
-          { scale: 1, opacity: 1, stagger: 0.08, duration: 0.35, ease: 'back.out(2.5)', delay: 0.55,
-            transformOrigin: '50% 50%', clearProps: 'opacity',
-            scrollTrigger: { trigger: c1, start: 'top 78%', once: true } }
-        )
-      }
+      )
 
-      // ── Card 2: layout blocks reveal ─────────────────────────────
-      const c2 = cardsRef.current[2]
-      if (c2) {
-        const q = gsap.utils.selector(c2)
-        gsap.fromTo([q('.w-hero'), q('.w-a'), q('.w-b'), q('.w-c')],
-          { opacity: 0, y: 8 },
-          { opacity: 1, y: 0, stagger: 0.1, duration: 0.55, ease: 'power2.out', clearProps: 'y',
-            scrollTrigger: { trigger: c2, start: 'top 80%', once: true } }
-        )
-        gsap.fromTo(q('.w-cursor'),
-          { x: -24, opacity: 0 },
-          { x: 0, opacity: 1, duration: 0.6, ease: 'power2.out', clearProps: 'opacity',
-            scrollTrigger: { trigger: c2, start: 'top 80%', once: true } }
-        )
-      }
+      gsap.fromTo(
+        [descRef.current, ctasRef.current].filter(Boolean),
+        { y: 24, opacity: 0 },
+        {
+          y: 0, opacity: 1,
+          stagger: 0.12,
+          duration: 0.8,
+          ease: 'power2.out',
+          delay: 0.5,
+          clearProps: 'opacity,transform',
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
+        }
+      )
 
-      // ── Card 3: B strokes draw + swatches pop ────────────────────
-      const c3 = cardsRef.current[3]
-      if (c3) {
-        const q = gsap.utils.selector(c3)
-        ;[q('.b-top')[0], q('.b-bot')[0]].forEach((path, pi) => {
-          if (!path || !path.getTotalLength) return
-          const len = path.getTotalLength()
-          gsap.set(path, { strokeDasharray: len, strokeDashoffset: len })
-          gsap.to(path, {
-            strokeDashoffset: 0, duration: 1.1, ease: 'power2.out', delay: pi * 0.25,
-            scrollTrigger: { trigger: c3, start: 'top 80%', once: true },
-          })
-        })
-        gsap.fromTo([q('.sw-1'), q('.sw-2'), q('.sw-3'), q('.sw-4')],
-          { scale: 0, opacity: 0 },
-          { scale: 1, opacity: 1, stagger: 0.08, duration: 0.38, ease: 'back.out(2.5)', delay: 0.65,
-            transformOrigin: '50% 50%', clearProps: 'opacity',
-            scrollTrigger: { trigger: c3, start: 'top 78%', once: true } }
-        )
-      }
+      gsap.fromTo(cardsRef.current.filter(Boolean),
+        { opacity: 0, y: 60 },
+        {
+          opacity: 1, y: 0,
+          stagger: 0.1,
+          duration: 0.9,
+          ease: 'power3.out',
+          clearProps: 'opacity,transform',
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 65%', once: true },
+        }
+      )
 
     }, sectionRef)
 
-    // ── Per-card hover (magnetic + illustration) ──────────────────
-    cardsRef.current.forEach((card, i) => {
-      if (!card) return
-      const q    = gsap.utils.selector(card)
-      const inner = innerRefs.current[i]
-      const glow  = glowRefs.current[i]
-      const { accent } = SERVICES[i]
-
-      const enter = () => {
-        gsap.to(card, { y: -10, scale: 1.018, duration: 0.38, ease: 'back.out(1.7)', overwrite: true })
-        card.style.borderColor = accent + '60'
-        card.style.boxShadow  = `0 28px 56px ${accent}18, inset 0 0 0 1px ${accent}30`
-        if (glow) gsap.to(glow, { opacity: 1, duration: 0.4 })
-
-        if (i === 0) {
-          gsap.to(q('.c-back'), { x: -16, y: 10, duration: 0.45, ease: 'power2.out', overwrite: 'auto' })
-          gsap.to(q('.c-mid'),  { x: -8,  y: 5,  duration: 0.4,  ease: 'power2.out', overwrite: 'auto' })
-          gsap.to(q('.c-play'), { scale: 1.18, transformOrigin: '50% 50%', duration: 0.35, ease: 'back.out(2)', overwrite: 'auto' })
-          gsap.to(q('.c-ring'), { rotation: 60, transformOrigin: '50% 50%', duration: 1.8, ease: 'power1.inOut', overwrite: 'auto' })
-        }
-        if (i === 1) {
-          gsap.to([q('.s-b1'), q('.s-b2'), q('.s-b3'), q('.s-b4'), q('.s-b5')], {
-            scaleY: 1.07, transformOrigin: '50% 100%',
-            stagger: 0.05, duration: 0.3, ease: 'power2.out', overwrite: 'auto',
-          })
-          gsap.to([q('.s-d1'), q('.s-d2'), q('.s-d3'), q('.s-d4'), q('.s-d5')], {
-            scale: 1.55, transformOrigin: '50% 50%',
-            stagger: 0.05, duration: 0.3, ease: 'back.out(2.2)', overwrite: 'auto',
-          })
-        }
-        if (i === 2) {
-          gsap.to(q('.w-cursor'), { x: 38, y: 14, duration: 0.85, ease: 'power1.inOut', overwrite: 'auto' })
-          gsap.to(q('.w-hero'), { opacity: 0.14, duration: 0.25, overwrite: 'auto' })
-          gsap.to(q('.w-a'),    { opacity: 0.12, duration: 0.25, delay: 0.1,  overwrite: 'auto' })
-          gsap.to(q('.w-b'),    { opacity: 0.12, duration: 0.25, delay: 0.2,  overwrite: 'auto' })
-          gsap.to(q('.w-c'),    { opacity: 0.12, duration: 0.25, delay: 0.3,  overwrite: 'auto' })
-        }
-        if (i === 3) {
-          gsap.to(q('.b-outer'), { rotation: 80, transformOrigin: '50% 50%', duration: 2.2, ease: 'power1.inOut', overwrite: 'auto' })
-          gsap.to(q('.b-mid'),   { scale: 1.07,  transformOrigin: '50% 50%', duration: 0.4,  ease: 'power2.out',  overwrite: 'auto' })
-          gsap.to([q('.sw-1'), q('.sw-2'), q('.sw-3'), q('.sw-4')], {
-            y: -6, stagger: 0.06, duration: 0.35, ease: 'back.out(2)', overwrite: 'auto',
-          })
-        }
-      }
-
-      const leave = () => {
-        gsap.to(card, { y: 0, scale: 1, duration: 0.55, ease: 'power3.out', overwrite: true })
-        card.style.borderColor = 'rgba(255,255,255,0.07)'
-        card.style.boxShadow  = 'none'
-        if (inner) gsap.to(inner, { x: 0, y: 0, duration: 0.55, ease: 'power3.out' })
-        if (glow)  gsap.to(glow,  { opacity: 0, duration: 0.4 })
-
-        if (i === 0) {
-          gsap.to([q('.c-back'), q('.c-mid')], { x: 0, y: 0, duration: 0.5, ease: 'power3.out', overwrite: 'auto' })
-          gsap.to(q('.c-play'), { scale: 1, duration: 0.4, overwrite: 'auto' })
-          gsap.to(q('.c-ring'), { rotation: 0, transformOrigin: '50% 50%', duration: 0.9, ease: 'power2.out', overwrite: 'auto' })
-        }
-        if (i === 1) {
-          gsap.to([q('.s-b1'), q('.s-b2'), q('.s-b3'), q('.s-b4'), q('.s-b5')], {
-            scaleY: 1, transformOrigin: '50% 100%', duration: 0.4, ease: 'power2.out', overwrite: 'auto',
-          })
-          gsap.to([q('.s-d1'), q('.s-d2'), q('.s-d3'), q('.s-d4'), q('.s-d5')], {
-            scale: 1, transformOrigin: '50% 50%', duration: 0.35, overwrite: 'auto',
-          })
-        }
-        if (i === 2) {
-          gsap.to(q('.w-cursor'), { x: 0, y: 0, duration: 0.65, ease: 'power2.out', overwrite: 'auto' })
-          gsap.to([q('.w-hero'), q('.w-a'), q('.w-b'), q('.w-c')], { opacity: 0.05, duration: 0.4, overwrite: 'auto' })
-        }
-        if (i === 3) {
-          gsap.to(q('.b-outer'), { rotation: 0, transformOrigin: '50% 50%', duration: 1.0, ease: 'power2.out', overwrite: 'auto' })
-          gsap.to(q('.b-mid'),   { scale: 1,    transformOrigin: '50% 50%', duration: 0.4,  ease: 'power2.out', overwrite: 'auto' })
-          gsap.to([q('.sw-1'), q('.sw-2'), q('.sw-3'), q('.sw-4')], { y: 0, duration: 0.4, overwrite: 'auto' })
-        }
-      }
-
-      // Magnetic parallax — inner content tracks the cursor gently
-      const move = (e) => {
-        if (!inner) return
-        const rect = card.getBoundingClientRect()
-        const x = ((e.clientX - rect.left) / rect.width  - 0.5) * 14
-        const y = ((e.clientY - rect.top)  / rect.height - 0.5) * 10
-        gsap.to(inner, { x, y, duration: 0.45, ease: 'power2.out' })
-      }
-
-      card.addEventListener('mouseenter', enter)
-      card.addEventListener('mouseleave', leave)
-      card.addEventListener('mousemove',  move)
-      listeners.push(
-        { el: card, type: 'mouseenter', fn: enter },
-        { el: card, type: 'mouseleave', fn: leave },
-        { el: card, type: 'mousemove',  fn: move  },
-      )
-    })
-
-    // CTA hover — slot-machine word animation
-    const ctaLink  = ctaLinkRef.current
-    const ctaWords = ctaWordsRef.current.filter(Boolean)
-    if (ctaLink && ctaWords.length) {
-      const ctaEnter = () => {
-        gsap.timeline()
-          .to(ctaWords, { y: -14, opacity: 0, stagger: 0.07, duration: 0.17, ease: 'power2.in' })
-          .set(ctaWords, { y: 14 })
-          .to(ctaWords, { y: 0, opacity: 1, stagger: 0.07, duration: 0.22, ease: 'power2.out' })
-      }
-      ctaLink.addEventListener('mouseenter', ctaEnter)
-      listeners.push({ el: ctaLink, type: 'mouseenter', fn: ctaEnter })
-    }
-
-    return () => {
-      ctx.revert()
-      listeners.forEach(({ el, type, fn }) => el.removeEventListener(type, fn))
-    }
+    return () => ctx.revert()
   }, [])
 
   return (
     <section
       ref={sectionRef}
-      className="pt-14 pb-28 px-6"
-      style={{
-        backgroundColor: '#000',
-        backgroundImage: 'radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)',
-        backgroundSize: '28px 28px',
-      }}
+      className="py-20 md:py-28 px-8 md:px-16 overflow-hidden"
+      style={{ backgroundColor: '#000' }}
     >
-      {/* Label */}
-      <p
-        ref={labelRef}
-        className="font-body text-center tracking-[0.28em] mb-14 m-0"
-        style={{ fontSize: 'clamp(14px, 1.3vw, 18px)', color: '#fff', opacity: 0.65, textTransform: 'uppercase' }}
-      >
-        {['Our', 'Services'].map((w, i, arr) => (
-          <span
-            key={i}
-            ref={el => { labelWordsRef.current[i] = el }}
-            style={{ display: 'inline-block', marginRight: i < arr.length - 1 ? '0.28em' : 0 }}
-          >
-            {w}
-          </span>
-        ))}
-      </p>
+      <div className="max-w-[1300px] mx-auto">
 
-      {/* 2 × 2 grid */}
-      <div className="services-grid max-w-5xl mx-auto grid grid-cols-2 gap-4">
-        {SERVICES.map((s, i) => (
-          <div
-            key={i}
-            ref={el => { cardsRef.current[i] = el }}
-            className="service-card relative overflow-hidden"
-            style={{
-              backgroundColor: '#0a0a0a',
-              border: '1px solid rgba(255,255,255,0.07)',
-              transition: 'border-color 0.35s ease, box-shadow 0.35s ease',
-              cursor: 'default',
-            }}
-          >
-            {/* Radial accent glow — fades in on hover via GSAP */}
-            <div
-              ref={el => { glowRefs.current[i] = el }}
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: `radial-gradient(ellipse at 50% 38%, ${s.accent}22 0%, transparent 68%)`,
-                opacity: 0,
-              }}
-            />
-
-            {/* Inner wrapper — tracks cursor (magnetic parallax) */}
-            <div ref={el => { innerRefs.current[i] = el }} className="service-card-inner relative z-10 flex flex-col">
-
-              {/* ── Illustration zone ── */}
-              <div className="relative" style={{ height: '120px', padding: '10px 10px 0' }}>
-                {/* Ambient colour blob behind illustration */}
-                <div
-                  className="absolute pointer-events-none"
-                  style={{
-                    width: '120px', height: '110px', borderRadius: '50%',
-                    background: s.accent,
-                    opacity: 0.045, filter: 'blur(40px)',
-                    top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                  }}
-                />
-
-                <div className="relative w-full h-full">
-                  {i === 0 && <IllustContent accent={s.accent} />}
-                  {i === 1 && <IllustSocial  accent={s.accent} />}
-                  {i === 2 && <IllustWeb     accent={s.accent} />}
-                  {i === 3 && <IllustBrand   accent={s.accent} />}
-                </div>
-
-              </div>
-
-              {/* ── Text content ── */}
-              <div className="px-5 pt-1 pb-4">
-                <div className="mb-1">
-                  <span
-                    className="font-heading"
-                    style={{ fontSize: 'clamp(28px, 2.6vw, 38px)', lineHeight: 1, color: '#fff', opacity: 0.05 }}
-                  >
-                    {s.num}
-                  </span>
-                </div>
-
-                <h3
-                  className="font-heading text-white m-0 mb-3"
-                  style={{ fontSize: 'clamp(15px, 1.35vw, 19px)', fontWeight: 400, lineHeight: 1.2 }}
-                >
-                  {s.name}
-                </h3>
-
-                <p
-                  className="font-body m-0"
-                  style={{ fontSize: 'clamp(12px, 0.95vw, 13.5px)', color: '#fff', opacity: 0.42, lineHeight: 1.65 }}
-                >
-                  {s.desc}
-                </p>
-              </div>
-            </div>
-
-            {/* Accent bottom strip */}
-            <div style={{ height: '3px', backgroundColor: s.accent }} />
-          </div>
-        ))}
-      </div>
-
-      {/* CTA */}
-      <div ref={ctaRef} className="text-center mt-20">
-        <a
-          ref={ctaLinkRef}
-          href="https://being-service-page.vercel.app/"
-          className="font-body tracking-[0.25em]"
-          style={{ fontSize: 'clamp(15px, 1.4vw, 20px)', color: '#fff', opacity: 0.6, textTransform: 'uppercase', cursor: 'pointer' }}
+        {/* Heading */}
+        <h2
+          className="font-heading text-white m-0 mb-6"
+          style={{ fontSize: 'clamp(28px, 3.5vw, 48px)', fontWeight: 400, lineHeight: 1.15 }}
         >
-          {['See', 'all', 'services', '→'].map((w, i, arr) => (
+          {HEADING_WORDS.map((word, i) => (
             <span
               key={i}
-              ref={el => { ctaWordsRef.current[i] = el }}
-              style={{ display: 'inline-block', marginRight: i < arr.length - 1 ? '0.28em' : 0 }}
+              style={{
+                display: 'inline-block',
+                overflow: 'hidden',
+                verticalAlign: 'bottom',
+                marginRight: i < HEADING_WORDS.length - 1 ? '0.28em' : 0,
+              }}
             >
-              {w}
+              <span ref={el => { wordsRef.current[i] = el }} style={{ display: 'inline-block' }}>
+                {word}
+              </span>
             </span>
           ))}
-        </a>
+        </h2>
+
+        {/* Rule */}
+        <div
+          ref={ruleRef}
+          style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.18)', marginBottom: '36px' }}
+        />
+
+        {/* Description + CTAs row */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+          <div ref={descRef}>
+            <p
+              className="font-body m-0 mb-6"
+              style={{
+                fontSize: 'clamp(14px, 1.2vw, 17px)',
+                color: 'rgba(255,255,255,0.55)',
+                lineHeight: 1.75,
+                maxWidth: '440px',
+              }}
+            >
+              Discover a range of services specially crafted to cater to your
+              unique business needs and goals. Our services include:
+            </p>
+          </div>
+
+          <div ref={ctasRef} className="w-full md:w-auto">
+            <a
+              href={SERVICE_PAGE}
+              className="font-body flex md:inline-flex items-center justify-center gap-3 tracking-[0.18em] text-[12px] md:text-[15px] px-4 py-2 md:px-7 md:py-3"
+              style={{
+                color: '#fff',
+                border: '1.5px solid #fff',
+                textDecoration: 'none',
+                transition: 'background 0.22s, color 0.22s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = '#fff'
+                e.currentTarget.style.color = '#000'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent'
+                e.currentTarget.style.color = '#fff'
+              }}
+            >
+              <PhoneIcon />
+              BOOK A FREE CONSULTATION
+            </a>
+          </div>
+        </div>
+
+        {/* 4-column cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {SERVICES.map((s, i) => (
+            <div key={i} ref={el => { cardsRef.current[i] = el }}>
+              <ServiceCard
+                s={s}
+                index={i}
+                isOpen={openCard === i}
+                onToggle={() => toggle(i)}
+              />
+            </div>
+          ))}
+        </div>
+
       </div>
     </section>
   )

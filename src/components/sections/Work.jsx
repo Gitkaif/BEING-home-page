@@ -4,255 +4,200 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
-// ─── ADD YOUR IMAGES HERE ────────────────────────────────────────────────────
-// Drop image files into /public/work/ and set the filename below.
-// Leave `image` as null to keep the dark placeholder.
-const PROJECTS = [
-  { name: 'Content Creaiton',         tag: 'Content ', accent: '#9B59B6', image: '/images/services/content/shoots/collage-h.png' }, // e.g. '/work/aromas.jpg'
-  { name: 'Website Creation',      tag: 'WEB',      accent: '#4CAF50', image: '/images/services/web-dev/img3.png' }, // e.g. '/work/verse.jpg'
-  { name: 'Website Creation',         tag: 'WEB',      accent: '#FF6B6B', image: '/images/services/web-dev/img11.png' }, // e.g. '/work/lumino.jpg'
-  { name: 'BRANDING', tag: 'BRANDING',  accent: '#F5C518', image: 'images/imgg.png' }, // e.g. '/work/offshoot.jpg'
+const COL1 = [
+  '/images/services/social-media/img1.png',
+  '/images/services/social-media/img3.png',
+  '/images/services/social-media/img5.png',
+  '/images/services/social-media/img7.png',
+  '/images/services/content/graphics/1.png',
+  '/images/services/branding/img7.png',
 ]
-// ─────────────────────────────────────────────────────────────────────────────
 
-function CardInner({ project }) {
+const COL2 = [
+  '/images/services/social-media/img2.png',
+  '/images/services/social-media/img4.png',
+  '/images/services/social-media/img6.png',
+  '/images/services/content/graphics/3.png',
+  '/images/services/content/graphics/img2.jpg',
+  '/images/services/content/graphics/4.png',
+]
+
+const COL3 = [
+  '/images/services/social-media/img8.jpg',
+  '/images/services/social-media/img44.png',
+  '/images/services/content/graphics/62.png',
+  '/images/services/content/graphics/42.png',
+  '/images/services/branding/branding-collage.png',
+  '/images/services/content/graphics/img1.jpg',
+]
+
+function ScrollColumn({ images, duration, startProgress = 0 }) {
+  const trackRef = useRef(null)
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    const tween = gsap.to(trackRef.current, {
+      yPercent: -50,
+      ease: 'none',
+      repeat: -1,
+      duration,
+    })
+    if (startProgress) tween.progress(startProgress)
+    return () => tween.kill()
+  }, [])
+
+  const doubled = [...images, ...images]
+
   return (
-    <>
-      {/* BG — image or placeholder, scales on hover */}
-      <div
-        className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-105 bg-[#1a1a1a] bg-cover bg-center"
-        style={project.image ? { backgroundImage: `url(${project.image})` } : {}}
-      />
-
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-
-      {/* Project info — slides up from below card edge */}
-      <div className="absolute inset-x-0 bottom-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out">
-        <p
-          className="font-display tracking-[0.22em] m-0 mb-1"
-          style={{ fontSize: '12px', color: project.accent }}
-        >
-          {project.tag}
-        </p>
-        <h3
-          className="font-heading text-white m-0"
-          style={{ fontSize: 'clamp(18px, 1.8vw, 24px)', fontWeight: 400, lineHeight: 1.2 }}
-        >
-          {project.name}
-        </h3>
+    <div style={{ overflow: 'hidden', flex: 1, minWidth: 0 }}>
+      <div ref={trackRef} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {doubled.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt=""
+            loading="lazy"
+            style={{
+              width: '100%',
+              aspectRatio: '1 / 1',
+              objectFit: 'cover',
+              borderRadius: '10px',
+              display: 'block',
+              flexShrink: 0,
+            }}
+          />
+        ))}
       </div>
-    </>
+    </div>
   )
 }
 
+const HEADING_WORDS = ['Our', 'Work']
+
 export default function Work() {
-  const sectionRef    = useRef(null)
-  const labelRef      = useRef(null)
-  const labelInnerRef = useRef(null)
-  const ruleRef       = useRef(null)
-  const dotRef        = useRef(null)
-  const cardsRef      = useRef([])
-  const ctaRef        = useRef(null)
-  const ctaLinkRef    = useRef(null)
-  const ctaWordsRef   = useRef([])
+  const sectionRef = useRef(null)
+  const wordsRef   = useRef([])
+  const descRef    = useRef(null)
+  const ctaRef     = useRef(null)
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
 
-      // ── Section panel rises with clip-path scrub ────────────────
-      gsap.fromTo(sectionRef.current,
-        { clipPath: 'inset(8% 0 0 0)' },
-        {
-          clipPath: 'inset(0% 0 0 0)',
-          ease: 'none',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top bottom',
-            end: 'top 20%',
-            scrub: 1.8,
-          },
-        }
-      )
-
-      // ── Transition rule draws left → right ───────────────────────
-      gsap.fromTo(ruleRef.current,
-        { scaleX: 0 },
-        {
-          scaleX: 1,
-          duration: 1.4,
-          ease: 'expo.inOut',
-          transformOrigin: 'left center',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 88%' },
-        }
-      )
-
-      // Diamond dot pops after the rule finishes drawing
-      gsap.from(dotRef.current, {
-        scale: 0, opacity: 0,
-        duration: 0.45, ease: 'back.out(2.5)', delay: 0.9,
-        transformOrigin: '50% 50%',
-        scrollTrigger: { trigger: sectionRef.current, start: 'top 88%' },
+      // Heading — word-by-word curtain drop (same as Offshoot)
+      gsap.from(wordsRef.current.filter(Boolean), {
+        y: '115%',
+        opacity: 0,
+        duration: 1.0,
+        stagger: 0.07,
+        ease: 'power4.out',
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
       })
 
-      // Label zooms out — starts oversized, shrinks into place (scrubbed)
-      gsap.fromTo(labelInnerRef.current,
-        { scale: 2.2, opacity: 0 },
-        {
-          scale: 1, opacity: 0.65,
-          ease: 'power1.out',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 78%',
-            end: 'top 42%',
-            scrub: 1.2,
-          },
-        }
-      )
-
-      // CTA words stagger in
-      gsap.from(ctaWordsRef.current.filter(Boolean), {
-        opacity: 0, y: 18,
-        stagger: 0.08, duration: 0.5, ease: 'power2.out',
-        scrollTrigger: { trigger: sectionRef.current, start: 'top 78%' },
-      })
-
-      // Cards: staggered rise — alternating from left / right
-      cardsRef.current.forEach((card, i) => {
-        if (!card) return
-        gsap.from(card, {
-          opacity: 0,
-          y: 72,
-          x: i % 2 === 0 ? -20 : 20,
-          duration: 0.95,
-          ease: 'power3.out',
-          delay: i * 0.08,
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 72%' },
-        })
+      // Desc + CTA fade up after heading starts (same as Offshoot)
+      gsap.from([descRef.current, ctaRef.current].filter(Boolean), {
+        y: 24,
+        opacity: 0,
+        stagger: 0.1,
+        duration: 0.8,
+        ease: 'power2.out',
+        delay: 0.4,
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
       })
 
     }, sectionRef)
-
-    // CTA hover — slot-machine word animation
-    const ctaLink  = ctaLinkRef.current
-    const ctaWords = ctaWordsRef.current.filter(Boolean)
-    if (ctaLink && ctaWords.length) {
-      const ctaEnter = () => {
-        gsap.timeline()
-          .to(ctaWords, { y: -14, opacity: 0, stagger: 0.07, duration: 0.17, ease: 'power2.in' })
-          .set(ctaWords, { y: 14 })
-          .to(ctaWords, { y: 0, opacity: 1, stagger: 0.07, duration: 0.22, ease: 'power2.out' })
-      }
-      ctaLink.addEventListener('mouseenter', ctaEnter)
-      return () => {
-        ctx.revert()
-        ctaLink.removeEventListener('mouseenter', ctaEnter)
-      }
-    }
-
     return () => ctx.revert()
   }, [])
 
   return (
     <section
       ref={sectionRef}
-      className="py-24 px-6"
+      className="overflow-hidden"
       style={{ backgroundColor: '#000' }}
     >
-      {/* ── Transition: glowing rule + dot ── */}
-      <div className="relative flex items-center mb-12">
-        {/* Line */}
-        <div
-          ref={ruleRef}
-          className="w-full"
-          style={{
-            height: '1px',
-            background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.45) 30%, rgba(255,255,255,0.18) 70%, transparent)',
-            boxShadow: '0 0 10px rgba(255,255,255,0.2)',
-          }}
-        />
-        {/* Diamond dot at the end */}
-        <div
-          ref={dotRef}
-          className="absolute right-0"
-          style={{
-            width: '7px', height: '7px',
-            backgroundColor: '#fff',
-            transform: 'rotate(45deg)',
-            flexShrink: 0,
-          }}
-        />
-      </div>
+      <div className="max-w-[1400px] mx-auto px-8 md:px-16 py-20 md:py-24 grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-12 md:gap-20 items-center">
 
-      {/* Section label — clips up from behind mask */}
-      <div ref={labelRef} style={{ marginBottom: '3rem' }}>
-        <p
-          ref={labelInnerRef}
-          className="font-display text-center tracking-[0.3em] m-0"
-          style={{ fontSize: 'clamp(22px, 2vw, 30px)', color: '#fff', opacity: 0.65 }}
-        >
-          SELECTED WORK
-        </p>
-      </div>
-
-      <div className="max-w-5xl mx-auto">
-
-        {/* Asymmetric top row: large left + two stacked right */}
-        <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-5 mb-5">
-
-          {/* Card 1 — large left */}
-          <div
-            ref={el => { cardsRef.current[0] = el }}
-            className="group relative overflow-hidden cursor-pointer h-[300px] md:h-[420px]"
+        {/* Left — heading, description, CTA */}
+        <div className="flex flex-col gap-7">
+          <h2
+            className="font-heading text-white m-0"
+            style={{ fontSize: 'clamp(28px, 3.5vw, 48px)', fontWeight: 400, lineHeight: 1.15 }}
           >
-            <CardInner project={PROJECTS[0]} />
-          </div>
+            {HEADING_WORDS.map((word, i) => (
+              <span
+                key={i}
+                style={{
+                  display: 'inline-block',
+                  overflow: 'hidden',
+                  verticalAlign: 'bottom',
+                  marginRight: i < HEADING_WORDS.length - 1 ? '0.28em' : 0,
+                }}
+              >
+                <span
+                  ref={el => { wordsRef.current[i] = el }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {word}
+                </span>
+              </span>
+            ))}
+          </h2>
 
-          {/* Right column — two smaller cards stacked */}
-          <div className="flex flex-col gap-5">
-            <div
-              ref={el => { cardsRef.current[1] = el }}
-              className="group relative overflow-hidden cursor-pointer h-[185px] md:h-[200px]"
-            >
-              <CardInner project={PROJECTS[1]} />
-            </div>
-            <div
-              ref={el => { cardsRef.current[2] = el }}
-              className="group relative overflow-hidden cursor-pointer h-[185px] md:h-[200px]"
-            >
-              <CardInner project={PROJECTS[2]} />
-            </div>
-          </div>
+          <p
+            ref={descRef}
+            className="font-body m-0"
+            style={{
+              fontSize: 'clamp(14px, 1.2vw, 17px)',
+              color: 'rgba(255,255,255,0.55)',
+              lineHeight: 1.75,
+            }}
+          >
+            At BEING, we bring ideas to life through striking visuals, smart strategy,
+            and engaging storytelling. From scroll-stopping content to full-scale brand
+            campaigns, our work is all about making brands look good and connect better.
+            Here's a glimpse of what we've created, crafted, and curated.
+          </p>
+
+          <a
+            ref={ctaRef}
+            href="https://being-work-page.vercel.app/"
+            className="font-body tracking-[0.18em] self-start"
+            style={{
+              fontSize: '15px',
+              color: '#fff',
+              border: '1.5px solid #fff',
+              padding: '12px 28px',
+              textDecoration: 'none',
+              display: 'inline-block',
+              transition: 'background 0.22s, color 0.22s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = '#fff'
+              e.currentTarget.style.color = '#000'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.color = '#fff'
+            }}
+          >
+            SEE ALL &rarr;
+          </a>
         </div>
 
-        {/* Card 4 — full-width bottom */}
+        {/* Right — auto-scrolling 3-column gallery */}
         <div
-          ref={el => { cardsRef.current[3] = el }}
-          className="group relative overflow-hidden cursor-pointer h-[220px] md:h-[340px]"
+          style={{
+            display: 'flex',
+            gap: '10px',
+            height: 'clamp(420px, 55vh, 580px)',
+            overflow: 'hidden',
+            borderRadius: '16px',
+          }}
         >
-          <CardInner project={PROJECTS[3]} />
+          <ScrollColumn images={COL1} duration={20} startProgress={0} />
+          <ScrollColumn images={COL2} duration={16} startProgress={0.35} />
+          <ScrollColumn images={COL3} duration={8} startProgress={0.65} />
         </div>
 
-      </div>
-
-      {/* CTA */}
-      <div ref={ctaRef} className="text-center mt-16">
-        <a
-          ref={ctaLinkRef}
-          href="https://being-work-page.vercel.app/"
-          className="font-body tracking-[0.25em]"
-          style={{ fontSize: 'clamp(15px, 1.4vw, 20px)', color: '#fff', opacity: 0.6, textTransform: 'uppercase', cursor: 'pointer' }}
-        >
-          {['VIEW', 'ALL', 'WORK', '→'].map((w, i, arr) => (
-            <span
-              key={i}
-              ref={el => { ctaWordsRef.current[i] = el }}
-              style={{ display: 'inline-block', marginRight: i < arr.length - 1 ? '0.28em' : 0 }}
-            >
-              {w}
-            </span>
-          ))}
-        </a>
       </div>
     </section>
   )

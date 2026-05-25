@@ -16,9 +16,9 @@ const MOSAIC_IMAGES = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STATS = [
-  { icon: '⚡', label: '48–72hr' },
-  { icon: '💰', label: '1/10th the cost' },
-  { icon: '✅', label: 'E-commerce ready' },
+  { label: '48–72hr' },
+  { label: '1/10th the cost' },
+  { label: 'E-commerce ready' },
 ]
 
 // Each image's scattered starting position — corner + rotation
@@ -56,11 +56,16 @@ export default function Offshoot() {
       })
 
       // Tag, body, stats, CTA fade up after headline starts
-      gsap.from([tagRef.current, bodyRef.current, statsRef.current, ctaRef.current], {
-        y: 24, opacity: 0,
-        stagger: 0.1, duration: 0.8, ease: 'power2.out', delay: 0.4,
-        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
-      })
+      gsap.fromTo(
+        [tagRef.current, bodyRef.current, statsRef.current, ctaRef.current].filter(Boolean),
+        { y: 24, opacity: 0 },
+        {
+          y: 0, opacity: 1,
+          stagger: 0.1, duration: 0.8, ease: 'power2.out', delay: 0.4,
+          clearProps: 'opacity,transform',
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
+        }
+      )
 
       // Images fly in from scattered positions and land in the grid
       gsap.from(imgRefs.current.filter(Boolean), {
@@ -113,9 +118,9 @@ export default function Offshoot() {
         }
       `}</style>
 
-      <div className="relative max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-16 md:gap-20">
+      <div className="relative max-w-6xl mx-auto flex flex-col md:flex-row-reverse items-center gap-16 md:gap-20">
 
-        {/* ── Left — text ── */}
+        {/* ── Right (visually) — text ── */}
         <div className="w-full md:w-1/2">
 
           {/* Tag */}
@@ -170,7 +175,7 @@ export default function Offshoot() {
                   className="font-display tracking-[0.1em] text-white"
                   style={{ fontSize: 'clamp(13px, 1.1vw, 15px)' }}
                 >
-                  {s.icon}&nbsp;{s.label}
+                  {s.label}
                 </span>
                 {i < STATS.length - 1 && (
                   <span style={{ color: 'rgba(255,255,255,0.2)', userSelect: 'none' }}>|</span>
@@ -182,15 +187,25 @@ export default function Offshoot() {
           {/* CTA */}
           <a
             ref={ctaRef}
-            href="https://offshoot.beingcompany.in"
+            href="https://offshoot.beingcompany.in/"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-display inline-block tracking-[0.18em] transition-opacity duration-200 hover:opacity-85"
+            className="font-body inline-block tracking-[0.18em]"
             style={{
-              fontSize: 'clamp(13px, 1.2vw, 16px)',
-              backgroundColor: '#F5C518',
-              color: '#000',
-              padding: '14px 36px',
+              fontSize: '15px',
+              color: '#fff',
+              border: '1.5px solid #fff',
+              padding: '12px 28px',
+              textDecoration: 'none',
+              transition: 'background 0.22s, color 0.22s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = '#fff'
+              e.currentTarget.style.color = '#000'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.color = '#fff'
             }}
           >
             EXPLORE OFFSHOOT →
@@ -217,6 +232,7 @@ export default function Offshoot() {
                   <img
                     src={src}
                     alt={`OffShoot sample ${i + 1}`}
+                    loading="lazy"
                     className="w-full h-full object-cover block"
                   />
                 </div>

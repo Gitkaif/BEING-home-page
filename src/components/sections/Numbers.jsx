@@ -7,7 +7,7 @@ gsap.registerPlugin(ScrollTrigger)
 const STATS = [
   { value: 92,   suffix: '%',  label: 'Client Retention Rate',        decimals: 0 },
   { value: 30,   suffix: '+',  label: 'Brands Worked With',           decimals: 0 },
-  { value: 2.5,  suffix: 'M+', label: 'Impressions Generated',        decimals: 1 },
+  { value: 3.25,  suffix: 'M+', label: 'Impressions Generated',        decimals: 2 },
   { value: 12,   suffix: '+',  label: 'Industries',                   decimals: 0 },
   { value: 5000, suffix: '+',  label: 'Pieces of Content Produced',   decimals: 0 },
 ]

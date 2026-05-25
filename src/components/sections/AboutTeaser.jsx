@@ -70,6 +70,7 @@ export default function AboutTeaser() {
             ref={imgRef}
             src="/images/services/content/shoots/img.jpeg"
             alt="About Being"
+            loading="lazy"
             className="relative block"
             style={{
               width: '100%',

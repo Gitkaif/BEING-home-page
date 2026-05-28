@@ -57,22 +57,18 @@ export default function LogoMarquee() {
 
         {/* Scrolling track */}
         <div
-          style={{
-            display: 'flex',
-            animation: 'marquee-ltr 28s linear infinite',
-            willChange: 'transform',
-          }}
+          className="logo-marquee-track"
+          style={{ display: 'flex', willChange: 'transform' }}
         >
           {TRACK.map((src, i) => (
             <div
               key={i}
+              className="logo-marquee-item"
               style={{
                 flexShrink: 0,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                paddingLeft: '48px',
-                paddingRight: '48px',
               }}
             >
               <img

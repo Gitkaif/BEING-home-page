@@ -1,6 +1,6 @@
 import { useRef, useLayoutEffect } from 'react'
 import gsap from 'gsap'
-import LightRays from '../LightRays'
+import Beams from '../Beams'
 
 // Two intentional lines — mirrors the work page's deliberate line-break approach
 const HEADLINE_LINES = [
@@ -67,21 +67,17 @@ export default function Hero() {
   return (
     <section ref={sectionRef} className="relative min-h-screen flex items-center justify-center bg-black text-white overflow-hidden">
 
-      {/* Light rays — full-bleed WebGL background */}
-      <div className="absolute inset-0 z-0" style={{ opacity: 1 }}>
-        <LightRays
-          raysOrigin="top-center"
-          raysColor="#ffffff"
-          raysSpeed={1}
-          lightSpread={0.5}
-          rayLength={8}
-          followMouse={true}
-          mouseInfluence={0.1}
-          noiseAmount={0}
-          distortion={0}
-          pulsating={false}
-          fadeDistance={1}
-          saturation={1}
+      {/* Beams — full-bleed WebGL background */}
+      <div style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, zIndex: 0 }}>
+        <Beams
+          beamWidth={3}
+          beamHeight={30}
+          beamNumber={20}
+          lightColor="#ffffff"
+          speed={2}
+          noiseIntensity={1.75}
+          scale={0.2}
+          rotation={30}
         />
       </div>
 

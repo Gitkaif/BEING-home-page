@@ -44,6 +44,11 @@ a, button {
   text-align: left;
 }
 
+@keyframes marquee-ltr {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 @media (max-width: 768px) {
   .services-grid {
     grid-auto-rows: 1fr;

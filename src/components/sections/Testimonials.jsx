@@ -102,17 +102,18 @@ export default function Testimonials() {
   // Keep stepRef pointing at the latest step so setInterval never goes stale
   stepRef.current = (dir) => go((activeRef.current + dir + n) % n)
 
-  // Drive timer via IntersectionObserver — starts only when section is on screen
+  // Drive timer via ScrollTrigger — synced with Lenis, starts only when section is on screen
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) startTimer()
-        else stopTimer()
-      },
-      { threshold: 0.3 }
-    )
-    if (sectionRef.current) observer.observe(sectionRef.current)
-    return () => { observer.disconnect(); stopTimer() }
+    const st = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: 'top 80%',
+      end: 'bottom 20%',
+      onEnter: startTimer,
+      onEnterBack: startTimer,
+      onLeave: stopTimer,
+      onLeaveBack: stopTimer,
+    })
+    return () => { st.kill(); stopTimer() }
   }, [])
 
   useEffect(() => {

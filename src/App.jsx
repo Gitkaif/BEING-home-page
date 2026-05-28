@@ -9,6 +9,7 @@ import Numbers from './components/sections/Numbers'
 import Services from './components/sections/Services'
 import Work from './components/sections/Work'
 import Offshoot from './components/sections/Offshoot'
+import LogoMarquee from './components/LogoMarquee'
 import Testimonials from './components/sections/Testimonials'
 import AboutTeaser from './components/sections/AboutTeaser'
 import FinalCTA from './components/sections/FinalCTA'
@@ -46,6 +47,7 @@ export default function App() {
         <Services />
         <Work />
         <Offshoot />
+        <LogoMarquee />
         <Testimonials />
         <AboutTeaser />
         <FinalCTA />

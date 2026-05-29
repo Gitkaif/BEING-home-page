@@ -75,13 +75,8 @@ export default function LogoMarquee() {
                 src={src}
                 alt=""
                 draggable="false"
-                style={{
-                  height: '64px',
-                  width: 'auto',
-                  maxWidth: '180px',
-                  objectFit: 'contain',
-                  userSelect: 'none',
-                }}
+                className="logo-marquee-img"
+                style={{ userSelect: 'none' }}
               />
             </div>
           ))}

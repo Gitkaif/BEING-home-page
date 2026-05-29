@@ -58,6 +58,13 @@ a, button {
   padding-right: 48px;
 }
 
+.logo-marquee-img {
+  height: 88px;
+  width: auto;
+  max-width: 220px;
+  object-fit: contain;
+}
+
 @media (max-width: 768px) {
   .logo-marquee-track {
     animation-duration: 7s;
@@ -65,6 +72,10 @@ a, button {
   .logo-marquee-item {
     padding-left: 20px;
     padding-right: 20px;
+  }
+  .logo-marquee-img {
+    height: 64px;
+    max-width: 160px;
   }
 }
 
